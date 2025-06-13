@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -8,31 +10,24 @@ interface MicroTask {
   xp: number;
 }
 
-interface TaskCardProps {
+interface Task {
   id: string;
   title: string;
   description: string;
   status: 'in_progress' | 'completed';
   xpReward: number;
   microTasks: MicroTask[];
-  onStatusChange: (taskId: string, status: 'in_progress' | 'completed') => void;
-  onMicroTaskComplete: (taskId: string, microTaskId: string) => void;
 }
 
-const TaskCard: React.FC<TaskCardProps> = ({
-  id,
-  title,
-  description,
-  status,
-  xpReward,
-  microTasks,
-  onStatusChange,
-  onMicroTaskComplete,
-}) => {
+interface TaskCardProps {
+  task: Task;
+}
+
+const TaskCard: React.FC<TaskCardProps> = ({ task }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
-  const completedMicroTasks = microTasks.filter(task => task.completed).length;
-  const progress = (completedMicroTasks / microTasks.length) * 100;
+  const completedMicroTasks = task.microTasks.filter(mt => mt.completed).length;
+  const progress = (completedMicroTasks / task.microTasks.length) * 100;
 
   return (
     <motion.div
@@ -44,24 +39,24 @@ const TaskCard: React.FC<TaskCardProps> = ({
       <div className="p-4">
         <div className="flex items-center justify-between mb-2">
           <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
-            {title}
+            {task.title}
           </h3>
           <div className="flex items-center space-x-2">
             <span className="text-sm font-medium text-purple-500">
-              +{xpReward} XP
+              +{task.xpReward} XP
             </span>
             <span
-              className={`px-2 py-1 text-xs font-medium rounded-full ${status === 'completed' 
+              className={`px-2 py-1 text-xs font-medium rounded-full ${task.status === 'completed' 
                 ? 'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100'
                 : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-100'}`}
             >
-              {status === 'completed' ? 'Completed' : 'In Progress'}
+              {task.status === 'completed' ? 'Completed' : 'In Progress'}
             </span>
           </div>
         </div>
 
         <p className="text-sm text-gray-600 dark:text-gray-300 mb-3">
-          {description}
+          {task.description}
         </p>
 
         <div className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
@@ -89,7 +84,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
               transition={{ duration: 0.3 }}
               className="mt-3 space-y-2"
             >
-              {microTasks.map(microTask => (
+              {task.microTasks.map(microTask => (
                 <div
                   key={microTask.id}
                   className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-700 rounded"
@@ -98,7 +93,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
                     <input
                       type="checkbox"
                       checked={microTask.completed}
-                      onChange={() => onMicroTaskComplete(id, microTask.id)}
+                      onChange={() => console.log('Micro task completed:', microTask.id)}
                       className="w-4 h-4 text-purple-500 rounded focus:ring-purple-500"
                     />
                     <span className={`text-sm ${microTask.completed 

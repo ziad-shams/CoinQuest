@@ -1,4 +1,6 @@
-import React from 'react';
+'use client';
+
+import * as React from 'react';
 import { motion } from 'framer-motion';
 
 interface XPBarProps {
@@ -13,7 +15,7 @@ const XPBar: React.FC<XPBarProps> = ({ currentXP, maxXP, level }) => {
   return (
     <div className="w-full p-4 bg-white dark:bg-gray-800 rounded-lg shadow-md">
       <div className="flex justify-between items-center mb-2">
-        <span className="text-lg font-semibold text-gray-700 dark:text-gray-200">
+        <span className={"text-lg font-semibold text-gray-700 dark:text-gray-200"}>
           Level {level}
         </span>
         <span className="text-sm text-gray-600 dark:text-gray-300">
