@@ -1,7 +1,1 @@
-{
-  "/page": "app/page.js",
-  "/quests/page": "app/quests/page.js",
-  "/wallet/page": "app/wallet/page.js",
-  "/rewards/page": "app/rewards/page.js",
-  "/settings/page": "app/settings/page.js"
-}
+{}

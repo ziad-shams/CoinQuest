@@ -1,0 +1,49 @@
+{
+  "badges": [
+    {
+      "id": "savings_novice",
+      "title": "Savings Novice",
+      "description": "Started your first savings goal",
+      "xpRequired": 100,
+      "icon": "🌱",
+      "category": "savings",
+      "tier": 1
+    },
+    {
+      "id": "budget_master",
+      "title": "Budget Master",
+      "description": "Complete 5 budgeting tasks",
+      "xpRequired": 500,
+      "icon": "📊",
+      "category": "budgeting",
+      "tier": 2
+    },
+    {
+      "id": "streak_warrior",
+      "title": "Streak Warrior",
+      "description": "Maintain a 7-day streak",
+      "xpRequired": 700,
+      "icon": "🔥",
+      "category": "engagement",
+      "tier": 2
+    },
+    {
+      "id": "investment_guru",
+      "title": "Investment Guru",
+      "description": "Complete your first investment task",
+      "xpRequired": 1000,
+      "icon": "📈",
+      "category": "investment",
+      "tier": 3
+    },
+    {
+      "id": "financial_master",
+      "title": "Financial Master",
+      "description": "Reach level 10",
+      "xpRequired": 2000,
+      "icon": "👑",
+      "category": "achievement",
+      "tier": 4
+    }
+  ]
+}
