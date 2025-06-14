@@ -1,0 +1,1 @@
+// Firebase and XP logic will be implemented here

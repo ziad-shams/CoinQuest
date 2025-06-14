@@ -1,5 +1,6 @@
 
 import React, { createContext, useContext, useReducer, ReactNode, useEffect } from 'react';
+import axios from 'axios';
 
 interface User {
   id: string;
@@ -79,7 +80,8 @@ type AppAction =
   | { type: 'UPDATE_SAVINGS_GOAL'; goal: { target: number; current: number; title: string } }
   | { type: 'TOGGLE_DARK_MODE' }
   | { type: 'UPDATE_STREAK' }
-  | { type: 'UNLOCK_BADGE'; badgeId: string };
+  | { type: 'UNLOCK_BADGE'; badgeId: string }
+  | { type: "SET_TASKS"; tasks: Task[] };
 
 const initialState: AppState = {
   user: {
@@ -293,7 +295,12 @@ function appReducer(state: AppState, action: AppAction): AppState {
           badge.id === action.badgeId ? { ...badge, unlocked: true } : badge
         )
       };
-
+    
+    case 'SET_TASKS':
+      return {
+        ...state,
+        tasks: action.tasks
+      };
     default:
       return state;
   }
@@ -308,24 +315,30 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const [state, dispatch] = useReducer(appReducer, initialState);
 
   useEffect(() => {
-    // Load state from localStorage
-    const savedState = localStorage.getItem('coinquest-state');
-    if (savedState) {
+    const fetchUserData = async () => {
       try {
-        const parsedState = JSON.parse(savedState);
-        // Merge with initial state to ensure new properties are included
-        Object.keys(parsedState).forEach(key => {
-          if (parsedState[key] !== undefined) {
-            if (key === 'user') {
-              dispatch({ type: 'UPDATE_USER', user: parsedState.user });
-            }
-          }
-        });
+        const response = await axios.get('http://localhost:5000/api/users/1');
+        const data = response.data;
+  
+        if (data.user) {
+          dispatch({ type: 'UPDATE_USER', user: data.user });
+        }
+        if (data.tasks) {
+          dispatch({ type: 'SET_TASKS', tasks: data.tasks });
+        }
+        if (data.badges) {
+          dispatch({ type: 'UNLOCK_BADGE', badgeId: '' }); // Placeholder logic if needed
+        }
+        // Handle other parts like transactions, savingsGoal, etc. as needed
+  
       } catch (error) {
-        console.error('Error loading saved state:', error);
+        console.error('Failed to fetch user data:', error);
       }
-    }
+    };
+  
+    fetchUserData();
   }, []);
+  
 
   useEffect(() => {
     // Save state to localStorage

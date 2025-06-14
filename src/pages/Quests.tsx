@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useAppContext } from '../context/AppContext';
 import TaskCard from '../components/TaskCard';
 import { Button } from '../components/ui/button';
@@ -7,11 +6,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from '../components/ui/input';
 import { Textarea } from '../components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
+import axios from 'axios';
 
 const Quests: React.FC = () => {
   const { state, dispatch } = useAppContext();
   const { tasks } = state;
-  
+
   const [filter, setFilter] = useState<'all' | 'inProgress' | 'completed'>('all');
   const [isAddingTask, setIsAddingTask] = useState(false);
   const [newTask, setNewTask] = useState({
@@ -22,6 +22,22 @@ const Quests: React.FC = () => {
     dueDate: new Date().toISOString().split('T')[0]
   });
 
+  useEffect(() => {
+    const fetchTasks = async () => {
+      try {
+        const response = await axios.get('http://localhost:5000/api/users/1');
+        const userData = response.data;
+        if (userData && userData.tasks) {
+          dispatch({ type: 'SET_TASKS', tasks: userData.tasks });
+        }
+      } catch (error) {
+        console.error('Failed to fetch tasks:', error);
+      }
+    };
+
+    fetchTasks();
+  }, [dispatch]);
+
   const filteredTasks = tasks.filter(task => {
     switch (filter) {
       case 'inProgress': return !task.completed;
@@ -31,7 +47,6 @@ const Quests: React.FC = () => {
   });
 
   const generateMicroTasks = (title: string, category: string) => {
-    // Simple AI-like task breakdown logic
     const commonMicroTasks: Record<string, string[]> = {
       financial: [
         'Research and gather information',
@@ -65,7 +80,7 @@ const Quests: React.FC = () => {
       id: `${Date.now()}-${index}`,
       title: template,
       completed: false,
-      xp: Math.floor(Math.random() * 15) + 5 // 5-20 XP per micro task
+      xp: Math.floor(Math.random() * 15) + 5
     }));
   };
 
@@ -74,11 +89,11 @@ const Quests: React.FC = () => {
 
     const microTasks = generateMicroTasks(newTask.title, newTask.category);
     const totalMicroXP = microTasks.reduce((sum, mt) => sum + mt.xp, 0);
-    
+
     const task = {
       id: Date.now().toString(),
       ...newTask,
-      xp: totalMicroXP + 20, // Base XP + micro task XP
+      xp: totalMicroXP + 20,
       completed: false,
       microTasks
     };
