@@ -7,10 +7,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from '../components/ui/input';
 import { Textarea } from '../components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
+import { useBackendSync } from '@/hooks/useBackendSync';
 
 const Wallet: React.FC = () => {
   const { state, dispatch } = useAppContext();
   const { transactions, cashBalance, creditBalance, savingsGoal } = state;
+  const { addTransaction } = useBackendSync(state.user.id);
   
   const [isAddingTransaction, setIsAddingTransaction] = useState(false);
   const [newTransaction, setNewTransaction] = useState({
@@ -22,7 +24,7 @@ const Wallet: React.FC = () => {
     category: 'food'
   });
 
-  const handleAddTransaction = () => {
+  const handleAddTransaction = async () => {
     if (!newTransaction.name.trim() || !newTransaction.amount) return;
 
     const transaction = {
@@ -37,6 +39,8 @@ const Wallet: React.FC = () => {
     };
 
     dispatch({ type: 'ADD_TRANSACTION', transaction });
+    await addTransaction(transaction)
+
     setNewTransaction({
       name: '',
       description: '',

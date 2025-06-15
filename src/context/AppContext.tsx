@@ -2,7 +2,7 @@
 import React, { createContext, useContext, useReducer, ReactNode, useEffect } from 'react';
 import axios from 'axios';
 
-interface User {
+export interface User {
   id: string;
   name: string;
   level: number;
@@ -17,7 +17,7 @@ interface User {
   fontSize: 'normal' | 'large';
 }
 
-interface Task {
+export interface Task {
   id: string;
   title: string;
   description: string;
@@ -29,14 +29,14 @@ interface Task {
   category: 'financial' | 'personal' | 'work' | 'health';
 }
 
-interface MicroTask {
+export interface MicroTask {
   id: string;
   title: string;
   completed: boolean;
   xp: number;
 }
 
-interface Badge {
+export interface Badge {
   id: string;
   title: string;
   description: string;
@@ -46,7 +46,7 @@ interface Badge {
   category: 'streak' | 'xp' | 'tasks' | 'financial';
 }
 
-interface Transaction {
+export interface Transaction {
   id: string;
   name: string;
   description: string;
@@ -57,7 +57,7 @@ interface Transaction {
   category: string;
 }
 
-interface AppState {
+export interface AppState {
   user: User;
   tasks: Task[];
   badges: Badge[];
@@ -71,6 +71,12 @@ interface AppState {
   creditBalance: number;
 }
 
+export interface SavingsGoal {
+  target: number;
+  current: number;
+  title: string;
+}
+
 type AppAction =
   | { type: 'COMPLETE_TASK'; taskId: string }
   | { type: 'COMPLETE_MICROTASK'; taskId: string; microTaskId: string }
@@ -81,7 +87,11 @@ type AppAction =
   | { type: 'TOGGLE_DARK_MODE' }
   | { type: 'UPDATE_STREAK' }
   | { type: 'UNLOCK_BADGE'; badgeId: string }
-  | { type: "SET_TASKS"; tasks: Task[] };
+  | { type: "SET_TASKS"; tasks: Task[] }
+  | { type: "SET_BADGES"; badges: Badge[] }
+  | { type: 'SET_TRANSACTIONS'; transactions: Transaction[] }
+  | { type: 'UPDATE_CASH_BALANCE'; cashBalance: number }
+  | { type: 'UPDATE_CREDIT_BALANCE'; creditBalance: number };
 
 const initialState: AppState = {
   user: {
@@ -301,6 +311,31 @@ function appReducer(state: AppState, action: AppAction): AppState {
         ...state,
         tasks: action.tasks
       };
+    
+    case 'SET_BADGES':
+      return {
+        ...state,
+        badges: action.badges
+      }
+
+    case 'SET_TRANSACTIONS':
+      return {
+        ...state,
+        transactions: action.transactions
+      }
+
+    case 'UPDATE_CASH_BALANCE':
+      return {
+        ...state,
+        cashBalance: action.cashBalance
+      }
+
+    case 'UPDATE_CREDIT_BALANCE':
+      return {
+        ...state,
+        creditBalance: action.creditBalance
+      }
+      
     default:
       return state;
   }
@@ -327,10 +362,21 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
           dispatch({ type: 'SET_TASKS', tasks: data.tasks });
         }
         if (data.badges) {
-          dispatch({ type: 'UNLOCK_BADGE', badgeId: '' }); // Placeholder logic if needed
+          dispatch({ type: 'SET_BADGES', badges: data.badges });
         }
-        // Handle other parts like transactions, savingsGoal, etc. as needed
-  
+        if (data.transactions) {
+          dispatch({ type: 'SET_TRANSACTIONS', transactions: data.transactions });
+        }
+        if (data.savingsGoal) {
+          dispatch({ type: 'UPDATE_SAVINGS_GOAL', goal: data.savingsGoal });
+        }
+        if (data.cashBalance !== undefined) {
+          dispatch({ type: 'UPDATE_CASH_BALANCE', cashBalance: data.cashBalance });
+        }
+        if (data.creditBalance !== undefined) {
+          dispatch({ type: 'UPDATE_CREDIT_BALANCE', creditBalance: data.creditBalance });
+        }
+
       } catch (error) {
         console.error('Failed to fetch user data:', error);
       }
@@ -366,3 +412,4 @@ export const useAppContext = () => {
   }
   return context;
 };
+

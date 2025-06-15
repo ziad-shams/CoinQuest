@@ -1,6 +1,50 @@
 const { db } = require('../firebase');
 const { getLevelFromXP } = require('../utils/xpLogic');
 
+exports.getTasks = async (req, res) => {
+  const { userId } = req.params;
+
+  try {
+    const userRef = db.collection('users').doc(userId);
+    const userSnap = await userRef.get();
+    if (!userSnap.exists) return res.status(404).json({ message: 'User not found' });
+
+    const userData = userSnap.data();
+    const tasks = userData.tasks || [];
+
+    res.status(200).json({
+      tasks,
+      message: 'Tasks retrieved successfully'
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+}
+
+exports.addTask = async (req, res) => {
+  const { userId, task } = req.body;
+
+  try {
+    const userRef = db.collection('users').doc(userId);
+    const userSnap = await userRef.get();
+    if (!userSnap.exists) return res.status(404).json({ message: 'User not found' });
+
+    const userData = userSnap.data();
+    const updatedTasks = [...userData.tasks, task];
+
+    await userRef.update({
+      'tasks': updatedTasks
+    });
+
+    res.status(200).json({
+      message: 'Tasks added successfully',
+      tasks: updatedTasks
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+}
+
 exports.completeTask = async (req, res) => {
   const { userId, taskId, taskXP } = req.body;
 
@@ -9,7 +53,7 @@ exports.completeTask = async (req, res) => {
     const userSnap = await userRef.get();
     if (!userSnap.exists) return res.status(404).json({ message: 'User not found' });
 
-    const userData = userSnap.data().user;
+    const userData = userSnap.data();
     const today = new Date().toISOString().split('T')[0];
     const isNewDay = today !== userData.lastActiveDate;
 
@@ -24,7 +68,7 @@ exports.completeTask = async (req, res) => {
       return task;
     });
 
-    const newXP = userData.xp + totalXPGained;
+    const newXP = userData.user.xp + totalXPGained;
     const newLevel = getLevelFromXP(newXP);
     const newStreak = isNewDay ? userData.streak + 1 : userData.streak;
 
@@ -33,7 +77,7 @@ exports.completeTask = async (req, res) => {
       'user.level': newLevel,
       'user.streak': newStreak,
       'user.lastActiveDate': today,
-      'user.tasks': updatedTasks
+      'tasks': updatedTasks
     });
 
     res.status(200).json({
@@ -56,7 +100,7 @@ exports.completeMicroTask = async (req, res) => {
     const userSnap = await userRef.get();
     if (!userSnap.exists) return res.status(404).json({ message: 'User not found' });
 
-    const userData = userSnap.data().user;
+    const userData = userSnap.data();
 
     let microXP = 0;
     const updatedTasks = userData.tasks.map(task => {
@@ -73,13 +117,13 @@ exports.completeMicroTask = async (req, res) => {
       return task;
     });
 
-    const newXP = userData.xp + microXP;
+    const newXP = userData.user.xp + microXP;
     const newLevel = getLevelFromXP(newXP);
 
     await userRef.update({
       'user.xp': newXP,
       'user.level': newLevel,
-      'user.tasks': updatedTasks
+      'tasks': updatedTasks
     });
 
     res.status(200).json({

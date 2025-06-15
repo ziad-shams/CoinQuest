@@ -4,7 +4,7 @@ const serviceAccount = require("./firebaseServiceKey.json");
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
-  databaseURL: "https://coinquest-a0153.firebaseio.com"
+  databaseURL: "https://coinquest-356c1.firebaseio.com"
 });
 
 const db = admin.firestore();

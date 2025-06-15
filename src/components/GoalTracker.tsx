@@ -1,10 +1,12 @@
 
 import React from 'react';
 import { useAppContext } from '../context/AppContext';
+import { useBackendSync } from '@/hooks/useBackendSync';
 
 const GoalTracker: React.FC = () => {
   const { state } = useAppContext();
   const { savingsGoal } = state;
+  const { updateSavingsGoal } = useBackendSync(state.user.id);
   
   const progressPercentage = (savingsGoal.current / savingsGoal.target) * 100;
   const remaining = savingsGoal.target - savingsGoal.current;

@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { useAppContext } from '../context/AppContext';
 import { Button } from './ui/button';
 import { Checkbox } from './ui/checkbox';
+import { useBackendSync } from '@/hooks/useBackendSync';
 
 interface TaskCardProps {
   task: {
@@ -24,15 +25,18 @@ interface TaskCardProps {
 }
 
 const TaskCard: React.FC<TaskCardProps> = ({ task }) => {
-  const { dispatch } = useAppContext();
+  const { state, dispatch } = useAppContext();
   const [isExpanded, setIsExpanded] = useState(false);
+  const { completeTask, completeMicroTask } = useBackendSync(state.user.id);
 
-  const handleCompleteTask = () => {
+  const handleCompleteTask = async () => {
     dispatch({ type: 'COMPLETE_TASK', taskId: task.id });
+    await completeTask(task.id);
   };
 
-  const handleCompleteMicroTask = (microTaskId: string) => {
+  const handleCompleteMicroTask = async (microTaskId: string) => {
     dispatch({ type: 'COMPLETE_MICROTASK', taskId: task.id, microTaskId });
+    await completeMicroTask(task.id, microTaskId);
   };
 
   const getPriorityColor = (priority: string) => {

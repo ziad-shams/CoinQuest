@@ -6,21 +6,26 @@ import { Input } from '../components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import { Switch } from '../components/ui/switch';
 import { Label } from '../components/ui/label';
+import { useBackendSync } from '@/hooks/useBackendSync';
 
 const Settings: React.FC = () => {
   const { state, dispatch } = useAppContext();
   const { user, savingsGoal } = state;
+  const { updateUser, updateSavingsGoal, toggleDarkMode } = useBackendSync( state.user.id )
 
-  const handleUserUpdate = (updates: Partial<typeof user>) => {
+  const handleUserUpdate = async (updates: Partial<typeof user>) => {
     dispatch({ type: 'UPDATE_USER', user: updates });
+    await updateUser(updates)
   };
 
-  const handleSavingsGoalUpdate = (updates: Partial<typeof savingsGoal>) => {
+  const handleSavingsGoalUpdate = async (updates: Partial<typeof savingsGoal>) => {
     dispatch({ type: 'UPDATE_SAVINGS_GOAL', goal: { ...savingsGoal, ...updates } });
+    await updateSavingsGoal({ ...savingsGoal, ...updates })
   };
 
-  const handleDarkModeToggle = () => {
+  const handleDarkModeToggle = async () => {
     dispatch({ type: 'TOGGLE_DARK_MODE' });
+    await toggleDarkMode(!state.user.darkMode)
   };
 
   return (

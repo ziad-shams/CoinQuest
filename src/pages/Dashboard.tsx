@@ -4,14 +4,19 @@ import { useAppContext } from '../context/AppContext';
 import XPBar from '../components/XPBar';
 import StreakTracker from '../components/StreakTracker';
 import TaskCard from '../components/TaskCard';
+import { useBackendSync } from '../hooks/useBackendSync';
 
 const Dashboard: React.FC = () => {
   const { state, dispatch } = useAppContext();
   const { user, tasks } = state;
+  const { updateStreak } = useBackendSync(state.user.id);
 
   useEffect(() => {
     // Update streak on dashboard visit
     dispatch({ type: 'UPDATE_STREAK' });
+    async () => {
+      await updateStreak(state.user.streak, state.user.lastActiveDate);
+    }
   }, [dispatch]);
 
   const todayTasks = tasks

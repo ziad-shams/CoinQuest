@@ -6,11 +6,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from '../components/ui/input';
 import { Textarea } from '../components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
+import { useBackendSync } from '../hooks/useBackendSync';
 import axios from 'axios';
 
 const Quests: React.FC = () => {
   const { state, dispatch } = useAppContext();
   const { tasks } = state;
+  const { addTask } = useBackendSync(state.user.id);
 
   const [filter, setFilter] = useState<'all' | 'inProgress' | 'completed'>('all');
   const [isAddingTask, setIsAddingTask] = useState(false);
@@ -84,7 +86,7 @@ const Quests: React.FC = () => {
     }));
   };
 
-  const handleAddTask = () => {
+  const handleAddTask = async () => {
     if (!newTask.title.trim()) return;
 
     const microTasks = generateMicroTasks(newTask.title, newTask.category);
@@ -99,6 +101,7 @@ const Quests: React.FC = () => {
     };
 
     dispatch({ type: 'ADD_TASK', task });
+    await addTask(task)
     setNewTask({
       title: '',
       description: '',

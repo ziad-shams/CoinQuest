@@ -1,10 +1,12 @@
 
 import React from 'react';
 import { useAppContext } from '../context/AppContext';
+import { useBackendSync } from '../hooks/useBackendSync';
 
 const BadgeGrid: React.FC = () => {
   const { state } = useAppContext();
   const { badges, user } = state;
+  const { unlockBadge } = useBackendSync(state.user.id);
 
   const checkBadgeUnlock = (badge: any) => {
     switch (badge.category) {
@@ -53,6 +55,9 @@ const BadgeGrid: React.FC = () => {
         {badges.map((badge, index) => {
           const position = getBadgePosition(index);
           const isUnlocked = badge.unlocked || checkBadgeUnlock(badge);
+          if( isUnlocked && !badge.unlocked ){
+            unlockBadge(badge.id)
+          }
           
           return (
             <div
