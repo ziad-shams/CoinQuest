@@ -46,7 +46,7 @@ exports.addTask = async (req, res) => {
 }
 
 exports.completeTask = async (req, res) => {
-  const { userId, taskId, taskXP } = req.body;
+  const { userId, taskId } = req.body;
 
   try {
     const userRef = db.collection('users').doc(userId);
@@ -57,12 +57,12 @@ exports.completeTask = async (req, res) => {
     const today = new Date().toISOString().split('T')[0];
     const isNewDay = today !== userData.lastActiveDate;
 
-    let totalXPGained = taskXP;
+    let totalXPGained = 0;
     const updatedTasks = userData.tasks.map(task => {
       if (task.id === taskId) {
         const updatedMicroTasks = task.microTasks?.map(micro => ({ ...micro, completed: true })) || [];
         const microXP = updatedMicroTasks.reduce((acc, micro) => acc + (micro.xp || 0), 0);
-        totalXPGained += microXP;
+        totalXPGained += microXP + task.xp;
         return { ...task, completed: true, microTasks: updatedMicroTasks };
       }
       return task;

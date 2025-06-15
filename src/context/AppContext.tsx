@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext, useReducer, ReactNode, useEffect } from 'react';
+import React, { createContext, useContext, useReducer, ReactNode, useEffect, useState } from 'react';
 import axios from 'axios';
 
 export interface User {
@@ -69,6 +69,7 @@ export interface AppState {
   };
   cashBalance: number;
   creditBalance: number;
+  loading: boolean;
 }
 
 export interface SavingsGoal {
@@ -91,7 +92,8 @@ type AppAction =
   | { type: "SET_BADGES"; badges: Badge[] }
   | { type: 'SET_TRANSACTIONS'; transactions: Transaction[] }
   | { type: 'UPDATE_CASH_BALANCE'; cashBalance: number }
-  | { type: 'UPDATE_CREDIT_BALANCE'; creditBalance: number };
+  | { type: 'UPDATE_CREDIT_BALANCE'; creditBalance: number }
+  | { type: 'SET_LOADING'; loading: boolean };
 
 const initialState: AppState = {
   user: {
@@ -172,7 +174,8 @@ const initialState: AppState = {
     title: 'Emergency Fund'
   },
   cashBalance: 0,
-  creditBalance: 0
+  creditBalance: 0,
+  loading: true
 };
 
 function appReducer(state: AppState, action: AppAction): AppState {
@@ -335,7 +338,10 @@ function appReducer(state: AppState, action: AppAction): AppState {
         ...state,
         creditBalance: action.creditBalance
       }
-      
+
+    case 'SET_LOADING':
+      return { ...state, loading: action.loading };
+
     default:
       return state;
   }
@@ -348,13 +354,13 @@ const AppContext = createContext<{
 
 export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [state, dispatch] = useReducer(appReducer, initialState);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchUserData = async () => {
       try {
         const response = await axios.get('http://localhost:5000/api/users/1');
         const data = response.data;
-  
         if (data.user) {
           dispatch({ type: 'UPDATE_USER', user: data.user });
         }
@@ -379,9 +385,10 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
       } catch (error) {
         console.error('Failed to fetch user data:', error);
+      } finally {
+        setLoading(false);
       }
     };
-  
     fetchUserData();
   }, []);
   
@@ -397,6 +404,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       document.documentElement.classList.remove('dark');
     }
   }, [state]);
+
+  if (loading) return <div></div>
 
   return (
     <AppContext.Provider value={{ state, dispatch }}>
